@@ -1,5 +1,4 @@
 /* 
- * File:   main.c
  * Author: tapin13
  *
  * Created on December 14, 2017, 1:05 AM
