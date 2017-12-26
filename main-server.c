@@ -35,11 +35,19 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
     
-    unsigned short port = 30001;
-    
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
-    address.sin_port = htons( (unsigned short) port);
+   
+    if(argc > 1) {
+        if(atoi(argv[1]) <= 65535) {
+            address.sin_port = htons(atoi(argv[1]));
+        } else {
+            printf("Port not valid\n");
+            return EXIT_FAILURE;
+        }
+    } else {
+        address.sin_port = htons(30000);
+    }
     
     if(bind(handle, (const struct sockaddr*)&address, sizeof(struct sockaddr_in)) < 0) {
         printf("failed to bind socket\n");
@@ -52,7 +60,7 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
     
-    printf("Server listen on port %hu...\n", port);
+    printf("Server listen on port %hu...\n", ntohs(address.sin_port));
     
     unsigned char send_packet_data[256] = { "pong" };
     unsigned int send_packet_size = sizeof(send_packet_data);

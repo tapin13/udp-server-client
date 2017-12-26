@@ -27,25 +27,38 @@ void sig_int(int sig_no) {
 }
 
 int main(int argc, char** argv) {
-    if(argc < 2) {
-        printf("Please provide UDP Server IP\n");
+    signal(SIGINT, sig_int);
+
+    struct sockaddr_in destination_address;
+    
+    destination_address.sin_family = AF_INET;
+    
+    char ip[16] = { "" };
+    
+    if(argc > 1) {
+        strcpy(ip, argv[1]);
+    } else {
+        strcpy(ip, "127.0.0.1");
+    }
+    
+    if(argc > 2) {
+        if(atoi(argv[2]) <= 65535) {
+            destination_address.sin_port = htons(atoi(argv[2]));
+        } else {
+            printf("Port not valid\n");
+            return EXIT_FAILURE;
+        }
+    } else {
+        destination_address.sin_port = htons(30000);
+    }
+    
+    if(inet_pton(AF_INET, ip, &destination_address.sin_addr.s_addr) == 0) {
+        printf("IP not valid\n");
         return EXIT_FAILURE;
     }
 
-    signal(SIGINT, sig_int);
-
-    const unsigned short destination_port = 30001;
-
-    struct sockaddr_in destination_address;
-
-    destination_address.sin_family = AF_INET;
-    destination_address.sin_port = htons(destination_port);
+    printf("UDP Server IP: %s:%hu\n", ip, ntohs(destination_address.sin_port));
     
-    if(inet_pton(AF_INET, argv[1], &destination_address.sin_addr.s_addr) == 0) {
-            printf("IP not valid\n");
-            return EXIT_FAILURE;
-    }
-
     int handle = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     
     if(handle <= 0) {
